@@ -1,0 +1,15 @@
+C:\Users\joped\Invention\LoxSharp\LoxSharp\bin\Debug\net7.0\LoxSharp.exe
+C:\Users\joped\Invention\LoxSharp\LoxSharp\bin\Debug\net7.0\LoxSharp.deps.json
+C:\Users\joped\Invention\LoxSharp\LoxSharp\bin\Debug\net7.0\LoxSharp.runtimeconfig.json
+C:\Users\joped\Invention\LoxSharp\LoxSharp\bin\Debug\net7.0\LoxSharp.dll
+C:\Users\joped\Invention\LoxSharp\LoxSharp\bin\Debug\net7.0\LoxSharp.pdb
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.csproj.AssemblyReference.cache
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.AssemblyInfoInputs.cache
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.AssemblyInfo.cs
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.csproj.CoreCompileInputs.cache
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.dll
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\refint\LoxSharp.dll
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.pdb
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\LoxSharp.genruntimeconfig.cache
+C:\Users\joped\Invention\LoxSharp\LoxSharp\obj\Debug\net7.0\ref\LoxSharp.dll
