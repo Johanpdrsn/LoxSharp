@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GenerateAST": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\joped\\Invention\\LoxSharp\\src\\LoxSharp"
+    }
+  }
+}
