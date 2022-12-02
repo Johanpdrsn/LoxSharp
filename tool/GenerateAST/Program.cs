@@ -33,12 +33,17 @@ internal class GenerateAST
         writer.WriteLine();
         writer.WriteLine($"abstract class {baseName} {{");
 
+        DefineVisitor(writer, baseName, types);
+
         foreach (string type in types)
         {
             string className = type.Split(":").First().Trim();
             string fields = type.Split(':')[1].Trim();
             DefineType(writer, baseName, className, fields);
         }
+
+        writer.WriteLine();
+        writer.WriteLine("    public abstract T Accept<T>(Visitor<T> visitor);");
 
         writer.WriteLine("}");
         writer.Close();
@@ -48,10 +53,10 @@ internal class GenerateAST
 
     private static void DefineType(StreamWriter writer, string baseName, string className, string fieldList)
     {
-        writer.WriteLine($"   class {className} : {baseName} {{");
+        writer.WriteLine($"   public class {className} : {baseName} {{");
 
         // Constructor
-        writer.WriteLine($"        {className}({fieldList}) {{");
+        writer.WriteLine($"        public {className}({fieldList}) {{");
 
         // Store paramters in fields
         string[] fields = fieldList.Split(", ");
@@ -62,11 +67,27 @@ internal class GenerateAST
         }
         writer.WriteLine("        }");
 
+        writer.WriteLine();
+        writer.WriteLine("    public override T Accept<T>(Visitor<T> visitor) {");
+        writer.WriteLine($"        return visitor.Visit{className}{baseName}(this);");
+        writer.WriteLine("    }");
         // Fields
         writer.WriteLine();
         foreach (string field in fields)
         {
-            writer.WriteLine($"        readonly {field};");
+            writer.WriteLine($"        public readonly {field};");
+        }
+        writer.WriteLine("    }");
+    }
+
+    private static void DefineVisitor(StreamWriter writer, string baseName, List<string> types)
+    {
+        writer.WriteLine("    public interface Visitor<T> {");
+
+        foreach (string type in types)
+        {
+            string typename = type.Split(":").First().Trim();
+            writer.WriteLine($"        public T Visit{typename}{baseName}({typename} {baseName.ToLower()});");
         }
         writer.WriteLine("    }");
     }
