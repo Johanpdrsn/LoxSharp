@@ -4,7 +4,10 @@ namespace LoxSharp;
 
 class LoxSharp
 {
+    private static readonly Interpreter interpreter = new();
     static bool hadError = false;
+    static bool hadRuntimeError = false;
+
     static void Main(string[] args)
     {
         if (args.Length > 1)
@@ -29,6 +32,8 @@ class LoxSharp
         Run(Encoding.Default.GetString(bytes));
 
         if (hadError) Environment.Exit(65);
+        if (hadRuntimeError) Environment.Exit(70);
+
     }
 
     private static void RunPrompt()
@@ -55,7 +60,8 @@ class LoxSharp
 
         if (hadError) return;
 
-        Console.WriteLine(new ASTPrinter().Print(expression));
+        //Console.WriteLine(new ASTPrinter().Print(expression));
+        interpreter.Interpret(expression);
     }
 
     internal static void Error(int line, string message)
@@ -73,6 +79,12 @@ class LoxSharp
         {
             Report(token.line, $"at '{token.lexeme}'", message);
         }
+    }
+
+    public static void RuntimeError(RuntimeError error)
+    {
+        Console.Error.WriteLine($"{error.Message}\n[line {error.token.line}]");
+        hadRuntimeError = true;
     }
 
     private static void Report(int line, string where, string message)
