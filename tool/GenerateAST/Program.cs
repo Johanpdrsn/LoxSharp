@@ -31,7 +31,7 @@ internal class GenerateAST
 
         writer.WriteLine("namespace LoxSharp;");
         writer.WriteLine();
-        writer.WriteLine($"abstract class {baseName} {{");
+        writer.WriteLine($"public abstract class {baseName} {{");
 
         DefineVisitor(writer, baseName, types);
 

@@ -14,24 +14,24 @@ class LoxSharp
         }
         else if (args.Length == 1)
         {
-            runFile(args[0]);
+            RunFile(args[0]);
         }
         else
         {
-            runPrompt();
+            RunPrompt();
         }
 
     }
 
-    private static void runFile(string path)
+    private static void RunFile(string path)
     {
         byte[] bytes = File.ReadAllBytes(Path.GetFullPath(path));
-        run(Encoding.Default.GetString(bytes));
+        Run(Encoding.Default.GetString(bytes));
 
         if (hadError) Environment.Exit(65);
     }
 
-    private static void runPrompt()
+    private static void RunPrompt()
     {
         using var streamReader = new StreamReader(Console.OpenStandardInput(), Encoding.Default, false, 8192);
 
@@ -40,25 +40,39 @@ class LoxSharp
             Console.WriteLine("> ");
             string line = streamReader.ReadLine()!;
             if (line == null) break;
-            run(line);
+            Run(line);
             hadError = false;
         }
     }
 
-    private static void run(string source)
+    private static void Run(string source)
     {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.ScanTokens();
 
-        foreach (Token token in tokens)
-        {
-            Console.WriteLine(token);
-        }
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.Parse();
+
+        if (hadError) return;
+
+        Console.WriteLine(new ASTPrinter().Print(expression));
     }
 
     internal static void Error(int line, string message)
     {
         Report(line, "", message);
+    }
+
+    internal static void Error(Token token, string message)
+    {
+        if (token.type == TokenType.EOF)
+        {
+            Report(token.line, "at end", message);
+        }
+        else
+        {
+            Report(token.line, $"at '{token.lexeme}'", message);
+        }
     }
 
     private static void Report(int line, string where, string message)

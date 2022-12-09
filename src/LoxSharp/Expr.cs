@@ -1,6 +1,6 @@
 namespace LoxSharp;
 
-abstract class Expr
+public abstract class Expr
 {
     public interface Visitor<T>
     {

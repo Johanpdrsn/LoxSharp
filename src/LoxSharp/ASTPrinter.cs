@@ -4,7 +4,7 @@ namespace LoxSharp;
 
 public class ASTPrinter : Expr.Visitor<string>
 {
-    string Print(Expr expr) => expr.Accept(this);
+    public string Print(Expr expr) => expr.Accept(this);
 
     string Expr.Visitor<string>.VisitBinaryExpr(Expr.Binary expr) => Parenthesize(expr.operaTor.lexeme, expr.left, expr.right);
 
