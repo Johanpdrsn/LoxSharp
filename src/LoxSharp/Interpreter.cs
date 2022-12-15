@@ -1,13 +1,16 @@
 ﻿namespace LoxSharp;
 
-public class Interpreter : Expr.Visitor<object>
+public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
 {
-    public void Interpret(Expr expression)
+    private Environment _environment = new();
+    public void Interpret(List<Stmt> statements)
     {
         try
         {
-            object value = Evaluate(expression);
-            Console.WriteLine(Stringify(value));
+            foreach (Stmt stmt in statements)
+            {
+                Execute(stmt);
+            }
         }
         catch (RuntimeError ex)
         {
@@ -122,5 +125,70 @@ public class Interpreter : Expr.Visitor<object>
     private object Evaluate(Expr expr)
     {
         return expr.Accept(this);
+    }
+
+    private void Execute(Stmt stmt)
+    {
+        stmt.Accept(this);
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    {
+        Environment previous = _environment;
+
+        try
+        {
+            _environment = environment;
+
+            foreach (Stmt stmt in statements)
+            {
+                Execute(stmt);
+            }
+        }
+        finally
+        {
+            _environment = previous;
+        }
+    }
+
+    public object VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt.expression);
+        return null;
+    }
+
+    public object VisitPrintStmt(Stmt.Print stmt)
+    {
+        object value = Evaluate(stmt.expression);
+        Console.WriteLine(Stringify(value));
+        return null;
+    }
+
+    public object VisitVarStmt(Stmt.Var stmt)
+    {
+        object value = null;
+        if (stmt.initializer is not null)
+            value = Evaluate(stmt.initializer);
+
+        _environment.Define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    public object VisitVariableExpr(Expr.Variable expr)
+    {
+        return _environment.Get(expr.name);
+    }
+
+    public object VisitAssignExpr(Expr.Assign expr)
+    {
+        object value = Evaluate(expr.value);
+        _environment.Assign(expr.name, value);
+        return value;
+    }
+
+    public object VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.statements, new Environment(_environment));
+        return null;
     }
 }

@@ -4,10 +4,28 @@ public abstract class Expr
 {
     public interface Visitor<T>
     {
+        public T VisitAssignExpr(Assign expr);
         public T VisitBinaryExpr(Binary expr);
         public T VisitGroupingExpr(Grouping expr);
         public T VisitLiteralExpr(Literal expr);
         public T VisitUnaryExpr(Unary expr);
+        public T VisitVariableExpr(Variable expr);
+    }
+    public class Assign : Expr
+    {
+        public Assign(Token name, Expr value)
+        {
+            this.name = name;
+            this.value = value;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitAssignExpr(this);
+        }
+
+        public readonly Token name;
+        public readonly Expr value;
     }
     public class Binary : Expr
     {
@@ -70,6 +88,20 @@ public abstract class Expr
 
         public readonly Token operaTor;
         public readonly Expr right;
+    }
+    public class Variable : Expr
+    {
+        public Variable(Token name)
+        {
+            this.name = name;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitVariableExpr(this);
+        }
+
+        public readonly Token name;
     }
 
     public abstract T Accept<T>(Visitor<T> visitor);

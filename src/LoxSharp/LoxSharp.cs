@@ -13,7 +13,7 @@ class LoxSharp
         if (args.Length > 1)
         {
             Console.WriteLine("Usage: loxc [script]");
-            Environment.Exit(64);
+            System.Environment.Exit(64);
         }
         else if (args.Length == 1)
         {
@@ -31,8 +31,8 @@ class LoxSharp
         byte[] bytes = File.ReadAllBytes(Path.GetFullPath(path));
         Run(Encoding.Default.GetString(bytes));
 
-        if (hadError) Environment.Exit(65);
-        if (hadRuntimeError) Environment.Exit(70);
+        if (hadError) System.Environment.Exit(65);
+        if (hadRuntimeError) System.Environment.Exit(70);
 
     }
 
@@ -56,12 +56,11 @@ class LoxSharp
         List<Token> tokens = scanner.ScanTokens();
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.Parse();
+        List<Stmt> statements = parser.Parse();
 
         if (hadError) return;
 
-        //Console.WriteLine(new ASTPrinter().Print(expression));
-        interpreter.Interpret(expression);
+        interpreter.Interpret(statements);
     }
 
     internal static void Error(int line, string message)

@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{90D6A79A-C30
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoxSharp", "src\LoxSharp\LoxSharp.csproj", "{B616A65B-05AB-413D-A4FB-34B6ABD8BE10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateAST", "tool\GenerateAST\GenerateAST.csproj", "{4D25BCAB-D768-4D3D-8392-7FF266216293}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerateAST", "tool\GenerateAST\GenerateAST.csproj", "{4D25BCAB-D768-4D3D-8392-7FF266216293}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

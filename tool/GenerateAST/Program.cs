@@ -15,11 +15,21 @@ internal class GenerateAST
         string outputDir = args[0];
 
         DefineAST(outputDir, "Expr", new List<string>{
+          "Assign   : Token name, Expr value",
           "Binary   : Expr left, Token operaTor, Expr right",
           "Grouping : Expr expression",
           "Literal  : Object value",
-          "Unary    : Token operaTor, Expr right" }
-        );
+          "Unary    : Token operaTor, Expr right",
+          "Variable : Token name"
+        });
+
+        DefineAST(outputDir, "Stmt", new List<string>
+        {
+            "Block      : List<Stmt> statements",
+            "Expression : Expr expression",
+            "Print      : Expr expression",
+            "Var        : Token name, Expr initializer"
+        });
     }
 
 
