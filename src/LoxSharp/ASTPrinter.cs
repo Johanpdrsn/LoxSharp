@@ -42,4 +42,9 @@ public class ASTPrinter : Expr.Visitor<string>
     {
         throw new NotImplementedException();
     }
+
+    public string VisitLogicalExpr(Expr.Logical expr)
+    {
+        throw new NotImplementedException();
+    }
 }

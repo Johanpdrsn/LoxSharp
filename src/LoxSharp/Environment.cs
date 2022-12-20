@@ -35,8 +35,11 @@ public class Environment
 
     internal void Assign(Token name, object value)
     {
-        if (_values.TryAdd(name.lexeme, value))
+        if (_values.ContainsKey(name.lexeme))
+        {
+            _values[name.lexeme] = value;
             return;
+        }
 
         if (_enclosing is not null)
         {
