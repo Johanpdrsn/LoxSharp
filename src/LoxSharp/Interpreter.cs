@@ -1,8 +1,22 @@
-﻿namespace LoxSharp;
+﻿using LoxSharp.Error;
+using LoxSharp.Interface;
+using LoxSharp.Model;
+using LoxSharp.NativeFunctions;
+using Environment = LoxSharp.Model.Environment;
 
-public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
+namespace LoxSharp;
+
+public class Interpreter : Expr.Visitor<object?>, Stmt.Visitor<object?>
 {
-    private Environment _environment = new();
+    internal readonly Environment globals = new();
+    private Environment _environment;
+
+    public Interpreter()
+    {
+        _environment = globals;
+        globals.Define("Clock", new Clock());
+    }
+
     public void Interpret(List<Stmt> statements)
     {
         try
@@ -18,101 +32,110 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         }
     }
 
-    public object VisitBinaryExpr(Expr.Binary expr)
+    public object? VisitBinaryExpr(Expr.Binary expr)
     {
-        object left = Evaluate(expr.left);
-        object right = Evaluate(expr.right);
+        object? left = Evaluate(expr.left);
+        object? right = Evaluate(expr.right);
 
+        double checkedLeft;
+        double checkedRight;
         switch (expr.operaTor.type)
         {
             case TokenType.GREATER:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left > (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft > checkedRight;
             case TokenType.GREATER_EQUAL:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left >= (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft >= checkedRight;
             case TokenType.LESS:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left < (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft < checkedRight;
             case TokenType.LESS_EQUAL:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left <= (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft <= checkedRight;
             case TokenType.BANG_EQUAL: return !IsEqual(left, right);
             case TokenType.EQUAL_EQUAL: return IsEqual(left, right);
             case TokenType.MINUS:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left - (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft - checkedRight;
             case TokenType.PLUS:
                 if (left is string leftString && right is string rString) return leftString + rString;
                 if (left is double leftDouble && right is double rightDouble) return leftDouble + rightDouble;
                 throw new RuntimeError(expr.operaTor, "Operands must be either numbers or strings");
             case TokenType.SLASH:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left / (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft / checkedRight;
             case TokenType.STAR:
-                CheckNumberOperands(expr.operaTor, left, right);
-                return (double)left * (double)right;
+                CheckNumberOperands(expr.operaTor, left, right, out checkedLeft, out checkedRight);
+                return checkedLeft * checkedRight;
         };
 
         return null;
     }
 
-    private bool IsEqual(object a, object b)
+    private bool IsEqual(object? a, object? b)
     {
         if (a is null && b is null) return true;
         if (a is null) return false;
         return a.Equals(b);
     }
 
-    private string Stringify(object value)
+    private string? Stringify(object? value)
     {
         return value switch
         {
             null => "nil",
-            double d => value.ToString().EndsWith("0.1") ? value.ToString()[..^2] : value.ToString(),
+            double d => d.ToString().EndsWith("0.1") ? d.ToString()[..^2] : d.ToString(),
             _ => value.ToString()
         };
     }
 
 
-    public object VisitGroupingExpr(Expr.Grouping expr)
+    public object? VisitGroupingExpr(Expr.Grouping expr)
     {
         return Evaluate(expr.expression);
     }
 
-    public object VisitLiteralExpr(Expr.Literal expr)
+    public object? VisitLiteralExpr(Expr.Literal expr)
     {
         return expr.value;
     }
 
-    public object VisitUnaryExpr(Expr.Unary expr)
+    public object? VisitUnaryExpr(Expr.Unary expr)
     {
-        object right = Evaluate(expr.right);
-
+        object? right = Evaluate(expr.right);
+        double typedOperand;
         switch (expr.operaTor.type)
         {
             case TokenType.BANG:
                 return !IsTruthy(right);
             case TokenType.MINUS:
-                CheckNumberOperand(expr.operaTor, right);
-                return -(double)right;
+                CheckNumberOperand(expr.operaTor, right, out typedOperand);
+                return -typedOperand;
         }
         return null;
     }
 
-    private void CheckNumberOperand(Token operaTor, object operand)
+    private void CheckNumberOperand(Token operaTor, object? operand, out double typedOperand)
     {
-        if (operand is double) return;
+        if (operand is double tO)
+        {
+            typedOperand = tO;
+            return;
+        }
         throw new RuntimeError(operaTor, "Operand must be a number");
     }
 
-    private void CheckNumberOperands(Token operaTor, object left, object right)
+    private void CheckNumberOperands(Token operaTor, object? left, object? right, out double doubleLeft, out double doubleRight)
     {
-        if (left is double && right is double) return;
+        if (left is double dL && right is double dR)
+        {
+            doubleLeft = dL; doubleRight = dR; return;
+        };
         throw new RuntimeError(operaTor, "Operands must be a number");
     }
 
-    private bool IsTruthy(object value)
+    private bool IsTruthy(object? value)
     {
         return value switch
         {
@@ -122,7 +145,7 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         };
     }
 
-    private object Evaluate(Expr expr)
+    private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);
     }
@@ -132,7 +155,7 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         stmt.Accept(this);
     }
 
-    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    internal void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         Environment previous = _environment;
 
@@ -151,22 +174,22 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         }
     }
 
-    public object VisitExpressionStmt(Stmt.Expression stmt)
+    public object? VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.expression);
         return null;
     }
 
-    public object VisitPrintStmt(Stmt.Print stmt)
+    public object? VisitPrintStmt(Stmt.Print stmt)
     {
-        object value = Evaluate(stmt.expression);
+        object? value = Evaluate(stmt.expression);
         Console.WriteLine(Stringify(value));
         return null;
     }
 
-    public object VisitVarStmt(Stmt.Var stmt)
+    public object? VisitVarStmt(Stmt.Var stmt)
     {
-        object value = null;
+        object? value = null;
         if (stmt.initializer is not null)
             value = Evaluate(stmt.initializer);
 
@@ -179,35 +202,35 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         return _environment.Get(expr.name);
     }
 
-    public object VisitAssignExpr(Expr.Assign expr)
+    public object? VisitAssignExpr(Expr.Assign expr)
     {
-        object value = Evaluate(expr.value);
+        object? value = Evaluate(expr.value);
         _environment.Assign(expr.name, value);
         return value;
     }
 
-    public object VisitBlockStmt(Stmt.Block stmt)
+    public object? VisitBlockStmt(Stmt.Block stmt)
     {
         ExecuteBlock(stmt.statements, new Environment(_environment));
         return null;
     }
 
-    public object VisitIfStmt(Stmt.If stmt)
+    public object? VisitIfStmt(Stmt.If stmt)
     {
         if (IsTruthy(Evaluate(stmt.condition)))
         {
             Execute(stmt.thenBranch);
         }
-        else if (stmt.elseBranch is null)
+        else if (stmt.elseBranch is not null)
         {
             Execute(stmt.elseBranch);
         }
         return null;
     }
 
-    public object VisitLogicalExpr(Expr.Logical expr)
+    public object? VisitLogicalExpr(Expr.Logical expr)
     {
-        object left = Evaluate(expr.left);
+        object? left = Evaluate(expr.left);
 
         if (expr.operaTor.type is TokenType.OR)
         {
@@ -223,12 +246,52 @@ public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
         return Evaluate(expr.right);
     }
 
-    public object VisitWhileStmt(Stmt.While stmt)
+    public object? VisitWhileStmt(Stmt.While stmt)
     {
         while (IsTruthy(Evaluate(stmt.condition)))
         {
             Execute(stmt.body);
         }
         return null;
+    }
+
+    public object? VisitCallExpr(Expr.Call expr)
+    {
+        object? callee = Evaluate(expr.callee);
+
+        List<object> args = new();
+        foreach (Expr arg in expr.arguments)
+        {
+            if (Evaluate(arg) is object val)
+                args.Add(val);
+        }
+
+        if (callee is not ILoxCallable function)
+        {
+            throw new RuntimeError(expr.paren, "Can only call functions and classes.");
+        }
+
+        if (args.Count != function.Arity())
+        {
+            throw new RuntimeError(expr.paren, $"Expected {function.Arity()} arguments bug got {args.Count}.");
+        }
+        return function.Call(this, args);
+    }
+
+    public object? VisitFunctionStmt(Stmt.Function stmt)
+    {
+        LoxFunction function = new(stmt, _environment);
+        _environment.Define(stmt.name.lexeme, function);
+        return null;
+    }
+
+    public object VisitReturnStmt(Stmt.Return stmt)
+    {
+        object? value = null;
+        if (stmt.value is not null)
+        {
+            value = Evaluate(stmt.value);
+        }
+        throw new Return(value);
     }
 }

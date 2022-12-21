@@ -1,9 +1,11 @@
-﻿namespace LoxSharp;
+﻿using LoxSharp.Error;
+
+namespace LoxSharp.Model;
 
 public class Environment
 {
-    private Environment _enclosing;
-    private readonly Dictionary<string, object> _values = new();
+    private Environment? _enclosing;
+    private readonly Dictionary<string, object?> _values = new();
 
     internal Environment()
     {
@@ -15,14 +17,14 @@ public class Environment
         _enclosing = environment;
     }
 
-    internal void Define(string name, object value)
+    internal void Define(string name, object? value)
     {
         _values[name] = value;
     }
 
     internal object Get(Token name)
     {
-        var exist = _values.TryGetValue(name.lexeme, out object value);
+        var exist = _values.TryGetValue(name.lexeme, out object? value);
 
         if (exist)
             return value!;
@@ -33,7 +35,7 @@ public class Environment
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
     }
 
-    internal void Assign(Token name, object value)
+    internal void Assign(Token name, object? value)
     {
         if (_values.ContainsKey(name.lexeme))
         {

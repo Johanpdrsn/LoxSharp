@@ -1,4 +1,6 @@
-﻿namespace LoxSharp;
+﻿using LoxSharp.Model;
+
+namespace LoxSharp;
 
 internal class Scanner
 {
@@ -195,7 +197,7 @@ internal class Scanner
     {
         return source[current++];
     }
-    private void AddToken(TokenType type, object literal)
+    private void AddToken(TokenType type, object? literal)
     {
         string text = source[start..current];
         tokens.Add(new Token(type, text, literal, line));

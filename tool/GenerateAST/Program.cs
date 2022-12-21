@@ -17,8 +17,9 @@ internal class GenerateAST
         DefineAST(outputDir, "Expr", new List<string>{
           "Assign   : Token name, Expr value",
           "Binary   : Expr left, Token operaTor, Expr right",
+          "Call     : Expr callee, Token paren, List<Expr> arguments",
           "Grouping : Expr expression",
-          "Literal  : Object value",
+          "Literal  : object? value",
           "Logical  : Expr left, Token operaTor, Expr right",
           "Unary    : Token operaTor, Expr right",
           "Variable : Token name"
@@ -28,9 +29,11 @@ internal class GenerateAST
         {
             "Block      : List<Stmt> statements",
             "Expression : Expr expression",
-            "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
+            "Function   : Token name, List<Token> parameters, List<Stmt> body",
+            "If         : Expr condition, Stmt thenBranch, Stmt? elseBranch",
             "Print      : Expr expression",
-            "Var        : Token name, Expr initializer",
+            "Return     : Token keyword, Expr? value",
+            "Var        : Token name, Expr? initializer",
             "While      : Expr condition, Stmt body"
         });
     }
@@ -38,10 +41,10 @@ internal class GenerateAST
 
     private static void DefineAST(string outputDir, string baseName, List<string> types)
     {
-
         string path = $"{outputDir}/{baseName}.cs";
         StreamWriter writer = new(path);
 
+        writer.WriteLine("using LoxSharp.Model;");
         writer.WriteLine("namespace LoxSharp;");
         writer.WriteLine();
         writer.WriteLine($"public abstract class {baseName} {{");

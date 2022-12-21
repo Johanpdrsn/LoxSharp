@@ -1,4 +1,6 @@
-﻿namespace LoxSharp;
+﻿using LoxSharp.Model;
+
+namespace LoxSharp.Error;
 
 public class RuntimeError : Exception
 {

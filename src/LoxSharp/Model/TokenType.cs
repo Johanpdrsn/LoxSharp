@@ -1,4 +1,4 @@
-﻿namespace LoxSharp;
+﻿namespace LoxSharp.Model;
 
 public enum TokenType
 {

@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using LoxSharp.Error;
+using LoxSharp.Model;
+using System.Text;
 
 namespace LoxSharp;
 

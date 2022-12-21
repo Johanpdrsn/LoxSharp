@@ -1,3 +1,4 @@
+using LoxSharp.Model;
 namespace LoxSharp;
 
 public abstract class Stmt
@@ -6,8 +7,10 @@ public abstract class Stmt
     {
         public T VisitBlockStmt(Block stmt);
         public T VisitExpressionStmt(Expression stmt);
+        public T VisitFunctionStmt(Function stmt);
         public T VisitIfStmt(If stmt);
         public T VisitPrintStmt(Print stmt);
+        public T VisitReturnStmt(Return stmt);
         public T VisitVarStmt(Var stmt);
         public T VisitWhileStmt(While stmt);
     }
@@ -39,9 +42,27 @@ public abstract class Stmt
 
         public readonly Expr expression;
     }
+    public class Function : Stmt
+    {
+        public Function(Token name, List<Token> parameters, List<Stmt> body)
+        {
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitFunctionStmt(this);
+        }
+
+        public readonly Token name;
+        public readonly List<Token> parameters;
+        public readonly List<Stmt> body;
+    }
     public class If : Stmt
     {
-        public If(Expr condition, Stmt thenBranch, Stmt elseBranch)
+        public If(Expr condition, Stmt thenBranch, Stmt? elseBranch)
         {
             this.condition = condition;
             this.thenBranch = thenBranch;
@@ -55,7 +76,7 @@ public abstract class Stmt
 
         public readonly Expr condition;
         public readonly Stmt thenBranch;
-        public readonly Stmt elseBranch;
+        public readonly Stmt? elseBranch;
     }
     public class Print : Stmt
     {
@@ -71,9 +92,25 @@ public abstract class Stmt
 
         public readonly Expr expression;
     }
+    public class Return : Stmt
+    {
+        public Return(Token keyword, Expr? value)
+        {
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitReturnStmt(this);
+        }
+
+        public readonly Token keyword;
+        public readonly Expr? value;
+    }
     public class Var : Stmt
     {
-        public Var(Token name, Expr initializer)
+        public Var(Token name, Expr? initializer)
         {
             this.name = name;
             this.initializer = initializer;
@@ -85,7 +122,7 @@ public abstract class Stmt
         }
 
         public readonly Token name;
-        public readonly Expr initializer;
+        public readonly Expr? initializer;
     }
     public class While : Stmt
     {

@@ -1,3 +1,4 @@
+using LoxSharp.Model;
 namespace LoxSharp;
 
 public abstract class Expr
@@ -6,6 +7,7 @@ public abstract class Expr
     {
         public T VisitAssignExpr(Assign expr);
         public T VisitBinaryExpr(Binary expr);
+        public T VisitCallExpr(Call expr);
         public T VisitGroupingExpr(Grouping expr);
         public T VisitLiteralExpr(Literal expr);
         public T VisitLogicalExpr(Logical expr);
@@ -46,6 +48,24 @@ public abstract class Expr
         public readonly Token operaTor;
         public readonly Expr right;
     }
+    public class Call : Expr
+    {
+        public Call(Expr callee, Token paren, List<Expr> arguments)
+        {
+            this.callee = callee;
+            this.paren = paren;
+            this.arguments = arguments;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitCallExpr(this);
+        }
+
+        public readonly Expr callee;
+        public readonly Token paren;
+        public readonly List<Expr> arguments;
+    }
     public class Grouping : Expr
     {
         public Grouping(Expr expression)
@@ -62,7 +82,7 @@ public abstract class Expr
     }
     public class Literal : Expr
     {
-        public Literal(Object value)
+        public Literal(object? value)
         {
             this.value = value;
         }
@@ -72,7 +92,7 @@ public abstract class Expr
             return visitor.VisitLiteralExpr(this);
         }
 
-        public readonly Object value;
+        public readonly object? value;
     }
     public class Logical : Expr
     {
