@@ -22,6 +22,22 @@ public class Environment
         _values[name] = value;
     }
 
+    internal object? GetAt(int distance, string name)
+    {
+        return Ancestor(distance)!._values[name];
+    }
+
+    private Environment? Ancestor(int distance)
+    {
+        Environment? environment = this;
+        for (int i = 0; i < distance; i++)
+        {
+            if (environment is not null)
+                environment = environment._enclosing;
+        }
+        return environment;
+    }
+
     internal object Get(Token name)
     {
         var exist = _values.TryGetValue(name.lexeme, out object? value);
@@ -48,8 +64,12 @@ public class Environment
             _enclosing.Assign(name, value);
             return;
         }
-
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'");
+    }
+
+    internal void AssignAt(int distance, Token name, object? value)
+    {
+        Ancestor(distance)!._values[name.lexeme] = value;
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using LoxSharp.Error;
 using LoxSharp.Model;
+using LoxSharp.Parser;
 using System.Text;
 
 namespace LoxSharp;
@@ -25,7 +26,6 @@ class LoxSharp
         {
             RunPrompt();
         }
-
     }
 
     private static void RunFile(string path)
@@ -35,7 +35,6 @@ class LoxSharp
 
         if (hadError) System.Environment.Exit(65);
         if (hadRuntimeError) System.Environment.Exit(70);
-
     }
 
     private static void RunPrompt()
@@ -57,8 +56,13 @@ class LoxSharp
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.ScanTokens();
 
-        Parser parser = new Parser(tokens);
+        Parser.Parser parser = new(tokens);
         List<Stmt> statements = parser.Parse();
+
+        if (hadError) return;
+
+        Resolver resolver = new(interpreter);
+        resolver.Resolve(statements);
 
         if (hadError) return;
 
@@ -94,6 +98,3 @@ class LoxSharp
         hadError = true;
     }
 }
-
-
-

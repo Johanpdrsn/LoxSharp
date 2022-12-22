@@ -1,5 +1,4 @@
-using LoxSharp.Model;
-namespace LoxSharp;
+namespace LoxSharp.Model;
 
 public abstract class Expr
 {

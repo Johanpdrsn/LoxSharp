@@ -9,6 +9,7 @@ namespace LoxSharp;
 public class Interpreter : Expr.Visitor<object?>, Stmt.Visitor<object?>
 {
     internal readonly Environment globals = new();
+    private readonly Dictionary<Expr, int> _locals = new();
     private Environment _environment;
 
     public Interpreter()
@@ -155,6 +156,12 @@ public class Interpreter : Expr.Visitor<object?>, Stmt.Visitor<object?>
         stmt.Accept(this);
     }
 
+    internal void Resolve(Expr expr, int depth)
+    {
+        _locals[expr] = depth;
+
+    }
+
     internal void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         Environment previous = _environment;
@@ -197,15 +204,34 @@ public class Interpreter : Expr.Visitor<object?>, Stmt.Visitor<object?>
         return null;
     }
 
-    public object VisitVariableExpr(Expr.Variable expr)
+    public object? VisitVariableExpr(Expr.Variable expr)
     {
-        return _environment.Get(expr.name);
+        return LookupVariable(expr.name, expr);
+    }
+
+    private object? LookupVariable(Token name, Expr expr)
+    {
+        if (_locals.TryGetValue(expr, out int distance))
+        {
+            return _environment.GetAt(distance, name.lexeme);
+        }
+        else
+        {
+            return globals.Get(name);
+        }
     }
 
     public object? VisitAssignExpr(Expr.Assign expr)
     {
         object? value = Evaluate(expr.value);
-        _environment.Assign(expr.name, value);
+        if (_locals.TryGetValue(expr, out int distance))
+        {
+            _environment.AssignAt(distance, expr.name, value);
+        }
+        else
+        {
+            globals.Assign(expr.name, value);
+        }
         return value;
     }
 

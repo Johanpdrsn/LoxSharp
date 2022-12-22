@@ -45,7 +45,7 @@ internal class GenerateAST
         StreamWriter writer = new(path);
 
         writer.WriteLine("using LoxSharp.Model;");
-        writer.WriteLine("namespace LoxSharp;");
+        writer.WriteLine("namespace LoxSharp.Model;");
         writer.WriteLine();
         writer.WriteLine($"public abstract class {baseName} {{");
 

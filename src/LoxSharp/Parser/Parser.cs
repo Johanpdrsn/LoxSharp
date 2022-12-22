@@ -1,6 +1,6 @@
 ﻿using LoxSharp.Model;
 
-namespace LoxSharp;
+namespace LoxSharp.Parser;
 
 public class Parser
 {
