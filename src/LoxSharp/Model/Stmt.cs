@@ -5,6 +5,7 @@ public abstract class Stmt
     public interface Visitor<T>
     {
         public T VisitBlockStmt(Block stmt);
+        public T VisitClassStmt(Class stmt);
         public T VisitExpressionStmt(Expression stmt);
         public T VisitFunctionStmt(Function stmt);
         public T VisitIfStmt(If stmt);
@@ -26,6 +27,22 @@ public abstract class Stmt
         }
 
         public readonly List<Stmt> statements;
+    }
+    public class Class : Stmt
+    {
+        public Class(Token name, List<Stmt.Function> methods)
+        {
+            this.name = name;
+            this.methods = methods;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitClassStmt(this);
+        }
+
+        public readonly Token name;
+        public readonly List<Stmt.Function> methods;
     }
     public class Expression : Stmt
     {

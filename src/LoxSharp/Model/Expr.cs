@@ -7,9 +7,12 @@ public abstract class Expr
         public T VisitAssignExpr(Assign expr);
         public T VisitBinaryExpr(Binary expr);
         public T VisitCallExpr(Call expr);
+        public T VisitGetExpr(Get expr);
         public T VisitGroupingExpr(Grouping expr);
         public T VisitLiteralExpr(Literal expr);
         public T VisitLogicalExpr(Logical expr);
+        public T VisitSetExpr(Set expr);
+        public T VisitThisExpr(This expr);
         public T VisitUnaryExpr(Unary expr);
         public T VisitVariableExpr(Variable expr);
     }
@@ -65,6 +68,22 @@ public abstract class Expr
         public readonly Token paren;
         public readonly List<Expr> arguments;
     }
+    public class Get : Expr
+    {
+        public Get(Expr obj, Token name)
+        {
+            this.obj = obj;
+            this.name = name;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitGetExpr(this);
+        }
+
+        public readonly Expr obj;
+        public readonly Token name;
+    }
     public class Grouping : Expr
     {
         public Grouping(Expr expression)
@@ -110,6 +129,38 @@ public abstract class Expr
         public readonly Expr left;
         public readonly Token operaTor;
         public readonly Expr right;
+    }
+    public class Set : Expr
+    {
+        public Set(Expr obj, Token name, Expr value)
+        {
+            this.obj = obj;
+            this.name = name;
+            this.value = value;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitSetExpr(this);
+        }
+
+        public readonly Expr obj;
+        public readonly Token name;
+        public readonly Expr value;
+    }
+    public class This : Expr
+    {
+        public This(Token keyword)
+        {
+            this.keyword = keyword;
+        }
+
+        public override T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.VisitThisExpr(this);
+        }
+
+        public readonly Token keyword;
     }
     public class Unary : Expr
     {

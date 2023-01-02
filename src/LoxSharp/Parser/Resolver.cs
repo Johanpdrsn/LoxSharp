@@ -7,6 +7,7 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
     private readonly Interpreter _interpreter;
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
     private FunctionType _functionType = FunctionType.NONE;
+    private ClassType _classType = ClassType.NONE;
 
     public Resolver(Interpreter interpreter)
     {
@@ -16,7 +17,15 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
     private enum FunctionType
     {
         NONE,
-        FUNCTION
+        FUNCTION,
+        INITIALIZER,
+        METHOD
+    }
+
+    private enum ClassType
+    {
+        NONE,
+        CLASS
     }
 
     internal void Resolve(List<Stmt> statements)
@@ -72,7 +81,7 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
             LoxSharp.Error(name, "ALready a variable with this name in this scope.");
         }
 
-        scope[name.lexeme] = false;
+        scope.Add(name.lexeme, false);
     }
 
     private void Define(Token name)
@@ -83,11 +92,11 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
 
     private void ResolveLocal(Expr expr, Token name)
     {
-        for (int i = _scopes.Count - 1; i >= 0; i--)
+        for (int i = 0; i < _scopes.Count; i++)
         {
             if (_scopes.ElementAt(i).ContainsKey(name.lexeme))
             {
-                _interpreter.Resolve(expr, _scopes.Count - 1 - i);
+                _interpreter.Resolve(expr, i);
                 return;
             }
         }
@@ -142,7 +151,8 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
 
     public object? VisitGroupingExpr(Expr.Grouping expr)
     {
-        Resolve(expr.expression); return null;
+        Resolve(expr.expression);
+        return null;
     }
 
     public object? VisitIfStmt(Stmt.If stmt)
@@ -168,7 +178,8 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
 
     public object? VisitPrintStmt(Stmt.Print stmt)
     {
-        Resolve(stmt.expression); return null;
+        Resolve(stmt.expression);
+        return null;
     }
 
     public object? VisitReturnStmt(Stmt.Return stmt)
@@ -177,7 +188,13 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
             LoxSharp.Error(stmt.keyword, "Can't return from top level code.");
 
         if (stmt.value is not null)
+        {
+            if (_functionType is FunctionType.INITIALIZER)
+                LoxSharp.Error(stmt.keyword, "Can't return from an initializer");
+
             Resolve(stmt.value);
+        }
+
         return null;
     }
 
@@ -189,7 +206,7 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
 
     public object? VisitVariableExpr(Expr.Variable expr)
     {
-        if (_scopes.Count != 0 && _scopes.Peek().TryGetValue(expr.name.lexeme, out bool val) && !val)
+        if (_scopes.Count > 0 && _scopes.Peek().TryGetValue(expr.name.lexeme, out bool val) && !val)
         {
             LoxSharp.Error(expr.name, "Can't read local variable in its own initializer.");
         }
@@ -212,6 +229,54 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
     {
         Resolve(stmt.condition);
         Resolve(stmt.body);
+        return null;
+    }
+
+    public object? VisitClassStmt(Stmt.Class stmt)
+    {
+        ClassType enclosingClass = _classType;
+        _classType = ClassType.CLASS;
+
+        Declare(stmt.name);
+        Define(stmt.name);
+
+        BeginScope();
+        _scopes.Peek()["this"] = true;
+
+        foreach (Stmt.Function method in stmt.methods)
+        {
+            FunctionType declaration = FunctionType.METHOD;
+            if (method.name.lexeme.Equals("init"))
+                declaration = FunctionType.INITIALIZER;
+
+            ResolveFunction(method, declaration);
+        }
+
+        EndScope();
+        _classType = enclosingClass;
+        return null;
+    }
+
+    public object? VisitGetExpr(Expr.Get expr)
+    {
+        Resolve(expr.obj);
+        return null;
+    }
+
+    public object? VisitSetExpr(Expr.Set expr)
+    {
+        Resolve(expr.value);
+        Resolve(expr.obj);
+        return null;
+    }
+
+    public object? VisitThisExpr(Expr.This expr)
+    {
+        if (_classType is ClassType.NONE)
+        {
+            LoxSharp.Error(expr.keyword, "Can't use 'this' outside of class.");
+        }
+        ResolveLocal(expr, expr.keyword);
         return null;
     }
 }

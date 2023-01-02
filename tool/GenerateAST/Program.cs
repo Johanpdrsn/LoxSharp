@@ -18,9 +18,12 @@ internal class GenerateAST
           "Assign   : Token name, Expr value",
           "Binary   : Expr left, Token operaTor, Expr right",
           "Call     : Expr callee, Token paren, List<Expr> arguments",
+          "Get      : Expr obj, Token name",
           "Grouping : Expr expression",
           "Literal  : object? value",
           "Logical  : Expr left, Token operaTor, Expr right",
+          "Set      : Expr obj, Token name, Expr value",
+          "This     : Token keyword",
           "Unary    : Token operaTor, Expr right",
           "Variable : Token name"
         });
@@ -28,6 +31,7 @@ internal class GenerateAST
         DefineAST(outputDir, "Stmt", new List<string>
         {
             "Block      : List<Stmt> statements",
+            "Class      : Token name, List<Stmt.Function> methods",
             "Expression : Expr expression",
             "Function   : Token name, List<Token> parameters, List<Stmt> body",
             "If         : Expr condition, Stmt thenBranch, Stmt? elseBranch",

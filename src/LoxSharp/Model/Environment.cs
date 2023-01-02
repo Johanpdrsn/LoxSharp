@@ -4,7 +4,7 @@ namespace LoxSharp.Model;
 
 public class Environment
 {
-    private Environment? _enclosing;
+    private readonly Environment? _enclosing;
     private readonly Dictionary<string, object?> _values = new();
 
     internal Environment()
@@ -24,12 +24,13 @@ public class Environment
 
     internal object? GetAt(int distance, string name)
     {
-        return Ancestor(distance)!._values[name];
+        return Ancestor(distance)!._values.TryGetValue(name, out object? val) ? val : null;
     }
 
     private Environment? Ancestor(int distance)
     {
         Environment? environment = this;
+        // this should maybe be 0
         for (int i = 0; i < distance; i++)
         {
             if (environment is not null)
