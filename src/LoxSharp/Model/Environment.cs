@@ -4,17 +4,17 @@ namespace LoxSharp.Model;
 
 public class Environment
 {
-    private readonly Environment? _enclosing;
+    internal readonly Environment? enclosing;
     private readonly Dictionary<string, object?> _values = new();
 
     internal Environment()
     {
-        _enclosing = null;
+        enclosing = null;
     }
 
     internal Environment(Environment environment)
     {
-        _enclosing = environment;
+        enclosing = environment;
     }
 
     internal void Define(string name, object? value)
@@ -34,7 +34,7 @@ public class Environment
         for (int i = 0; i < distance; i++)
         {
             if (environment is not null)
-                environment = environment._enclosing;
+                environment = environment.enclosing;
         }
         return environment;
     }
@@ -46,8 +46,8 @@ public class Environment
         if (exist)
             return value!;
 
-        if (_enclosing is not null)
-            return _enclosing.Get(name);
+        if (enclosing is not null)
+            return enclosing.Get(name);
 
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
     }
@@ -60,9 +60,9 @@ public class Environment
             return;
         }
 
-        if (_enclosing is not null)
+        if (enclosing is not null)
         {
-            _enclosing.Assign(name, value);
+            enclosing.Assign(name, value);
             return;
         }
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'");

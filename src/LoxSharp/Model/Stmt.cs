@@ -30,9 +30,10 @@ public abstract class Stmt
     }
     public class Class : Stmt
     {
-        public Class(Token name, List<Stmt.Function> methods)
+        public Class(Token name, Expr.Variable? superClass, List<Stmt.Function> methods)
         {
             this.name = name;
+            this.superClass = superClass;
             this.methods = methods;
         }
 
@@ -42,6 +43,7 @@ public abstract class Stmt
         }
 
         public readonly Token name;
+        public readonly Expr.Variable? superClass;
         public readonly List<Stmt.Function> methods;
     }
     public class Expression : Stmt

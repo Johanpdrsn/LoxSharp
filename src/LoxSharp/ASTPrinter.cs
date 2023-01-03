@@ -68,4 +68,9 @@ public class ASTPrinter : Expr.Visitor<string>
     {
         throw new NotImplementedException();
     }
+
+    public string VisitSuperExpr(Expr.Super expr)
+    {
+        throw new NotImplementedException();
+    }
 }

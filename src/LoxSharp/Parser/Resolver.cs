@@ -25,7 +25,8 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
     private enum ClassType
     {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 
     internal void Resolve(List<Stmt> statements)
@@ -240,6 +241,22 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
         Declare(stmt.name);
         Define(stmt.name);
 
+        if (stmt.superClass is not null && stmt.name.lexeme.Equals(stmt.superClass.name.lexeme))
+        {
+            LoxSharp.Error(stmt.superClass.name, "A class can't inherit from itself.");
+        }
+        if (stmt.superClass is not null)
+        {
+            _classType = ClassType.SUBCLASS;
+            Resolve(stmt.superClass);
+        }
+
+        if (stmt.superClass is not null)
+        {
+            BeginScope();
+            _scopes.Peek().Add("super", true);
+        }
+
         BeginScope();
         _scopes.Peek()["this"] = true;
 
@@ -253,6 +270,8 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
         }
 
         EndScope();
+        if (stmt.superClass is not null) EndScope();
+
         _classType = enclosingClass;
         return null;
     }
@@ -275,6 +294,20 @@ internal class Resolver : Expr.Visitor<object?>, Stmt.Visitor<object?>
         if (_classType is ClassType.NONE)
         {
             LoxSharp.Error(expr.keyword, "Can't use 'this' outside of class.");
+        }
+        ResolveLocal(expr, expr.keyword);
+        return null;
+    }
+
+    public object? VisitSuperExpr(Expr.Super expr)
+    {
+        if (_classType is ClassType.NONE)
+        {
+            LoxSharp.Error(expr.keyword, "Can't use 'super' outside of a class");
+        }
+        else if (_classType is not ClassType.SUBCLASS)
+        {
+            LoxSharp.Error(expr.keyword, "Can't use 'super' in a class with no superclass");
         }
         ResolveLocal(expr, expr.keyword);
         return null;

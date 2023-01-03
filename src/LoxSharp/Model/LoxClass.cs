@@ -6,9 +6,11 @@ internal class LoxClass : ILoxCallable
 {
     internal readonly string name;
     private readonly Dictionary<string, LoxFunction> _methods;
+    internal readonly LoxClass? superClass;
 
-    public LoxClass(string name, Dictionary<string, LoxFunction> methods)
+    public LoxClass(string name, LoxClass? superClass, Dictionary<string, LoxFunction> methods)
     {
+        this.superClass = superClass;
         this.name = name;
         _methods = methods;
     }
@@ -35,6 +37,9 @@ internal class LoxClass : ILoxCallable
     {
         if (_methods.TryGetValue(name, out var method))
             return method;
+
+        if (superClass is not null)
+            return superClass.FindMethod(name);
 
         return null;
     }
